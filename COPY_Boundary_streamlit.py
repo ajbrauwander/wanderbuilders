@@ -24,10 +24,10 @@ import re
 from datetime import datetime
 
 # wander_key_ = os.getenv('wander_key')
-wander_key_ = st.secrets["wander_key"]
+wander_key_ = "AIzaSyD6XxLeRgR8ZiGdKSwayaPEDn2GGkiHOyc"
 
-USERNAME = st.secrets["USERNAME"]
-PASSWORD = st.secrets["PASSWORD"]
+USERNAME = "wander"
+PASSWORD = "Ajbrau"
 
 
 # Function to handle login
@@ -36,8 +36,9 @@ def login(username, password):
         return True
     else:
         return False
-    
+
 ####### Developer Section ########
+
 
 if 'logged_in' not in st.session_state:
     st.session_state.logged_in = False
@@ -103,7 +104,8 @@ else:
     def geocoding_page():
         st.title("Geocoding & Reverse Geocoding")
 
-        option = st.selectbox("Choose an option", ["Geocoding", "Reverse Geocoding"])
+        option = st.selectbox("Choose an option", [
+                              "Geocoding", "Reverse Geocoding"])
         coord_format = st.selectbox("Coordinate Format", ["W, N", "lat, lng"])
         query_type = st.radio("Query Type", ["Single Query", "Upload File"])
 
@@ -141,7 +143,8 @@ else:
                         else:
                             st.write("Coordinates not found.")
         else:
-            uploaded_file = st.file_uploader("Choose a file", type=["csv", "xlsx"])
+            uploaded_file = st.file_uploader(
+                "Choose a file", type=["csv", "xlsx"])
             if uploaded_file:
                 if "csv" in uploaded_file.name:
                     df = pd.read_csv(uploaded_file)
@@ -150,17 +153,24 @@ else:
 
                 if st.button("Process"):
                     if option == "Geocoding":
-                        df['Coordinates'] = df.iloc[:, 0].apply(lambda addr: geocode_address(addr, wander_key_))
-                        df['Latitude'] = df['Coordinates'].apply(lambda x: x[0])
-                        df['Longitude'] = df['Coordinates'].apply(lambda x: x[1])
+                        df['Coordinates'] = df.iloc[:, 0].apply(
+                            lambda addr: geocode_address(addr, wander_key_))
+                        df['Latitude'] = df['Coordinates'].apply(
+                            lambda x: x[0])
+                        df['Longitude'] = df['Coordinates'].apply(
+                            lambda x: x[1])
                         df.drop(columns=['Coordinates'], inplace=True)
                     else:
                         if coord_format == "W, N":
-                            df['lat'] = df['n'].astype(str).apply(dms_to_decimal)
-                            df['lon'] = df['w'].astype(str).apply(dms_to_decimal)
-                            df['Address'] = df.apply(lambda row: reverse_geocode(row['lat'], row['lon'], wander_key_), axis=1)
+                            df['lat'] = df['n'].astype(
+                                str).apply(dms_to_decimal)
+                            df['lon'] = df['w'].astype(
+                                str).apply(dms_to_decimal)
+                            df['Address'] = df.apply(lambda row: reverse_geocode(
+                                row['lat'], row['lon'], wander_key_), axis=1)
                         else:
-                            df['Address'] = df.apply(lambda row: reverse_geocode(row[0], row[1], wander_key_), axis=1)
+                            df['Address'] = df.apply(lambda row: reverse_geocode(
+                                row[0], row[1], wander_key_), axis=1)
 
                     st.write(df)
 
@@ -171,7 +181,8 @@ else:
                         writer.save()
                     output.seek(0)
 
-                    st.success("File processed successfully. Download the output file below.")
+                    st.success(
+                        "File processed successfully. Download the output file below.")
                     st.download_button(
                         label="Download Output",
                         data=output,
@@ -181,7 +192,7 @@ else:
 
         if st.button('Back to Home'):
             st.session_state.operation = None
-            st.experimental_rerun()
+            st.rerun()
 
     ########### end geocoding ############
 
@@ -225,20 +236,23 @@ else:
                 "properties": {},
                 "geometry": {}
             }
-            
+
             # Extract Polygon geometries
             polygon = placemark.find(".//{}Polygon".format(kml_ns))
             if polygon is not None:
                 feature["geometry"]["type"] = "Polygon"
-                outer_boundary = polygon.find("{}outerBoundaryIs/{}LinearRing/{}coordinates".format(kml_ns, kml_ns, kml_ns))
-                feature["geometry"]["coordinates"] = [extract_coordinates(outer_boundary)]
-                
+                outer_boundary = polygon.find(
+                    "{}outerBoundaryIs/{}LinearRing/{}coordinates".format(kml_ns, kml_ns, kml_ns))
+                feature["geometry"]["coordinates"] = [
+                    extract_coordinates(outer_boundary)]
+
             # Extract LineString geometries
             linestring = placemark.find(".//{}LineString".format(kml_ns))
             if linestring is not None:
                 feature["geometry"]["type"] = "LineString"
                 coordinates = linestring.find("{}coordinates".format(kml_ns))
-                feature["geometry"]["coordinates"] = extract_coordinates(coordinates)
+                feature["geometry"]["coordinates"] = extract_coordinates(
+                    coordinates)
 
             # If we've defined a geometry, add the feature to the list
             if "type" in feature["geometry"]:
@@ -250,11 +264,11 @@ else:
     def make_random_changes_from_file(gdf, tolerance=0.000007):
         """
         Modify the LineString or MultiLineString geometry in the given GeoDataFrame.
-        
+
         Parameters:
             gdf (GeoDataFrame): Input GeoDataFrame.
             tolerance (float): Amount by which to randomly alter each coordinate.
-            
+
         Returns:
             GeoDataFrame: Modified GeoDataFrame.
         """
@@ -273,15 +287,18 @@ else:
         for geometry in lines.geometry:
             if isinstance(geometry, LineString):
                 coords = list(geometry.coords)
-                modified_coords = [(x + random.uniform(-tolerance, tolerance), y + random.uniform(-tolerance, tolerance)) for x, y in coords]
+                modified_coords = [(x + random.uniform(-tolerance, tolerance),
+                                    y + random.uniform(-tolerance, tolerance)) for x, y in coords]
                 modified_geoms.append(LineString(modified_coords))
             elif isinstance(geometry, MultiLineString):
                 modified_multiline_coords = []
                 for linestring in geometry:
                     coords = list(linestring.coords)
-                    modified_coords = [(x + random.uniform(-tolerance, tolerance), y + random.uniform(-tolerance, tolerance)) for x, y in coords]
+                    modified_coords = [(x + random.uniform(-tolerance, tolerance),
+                                        y + random.uniform(-tolerance, tolerance)) for x, y in coords]
                     modified_multiline_coords.append(modified_coords)
-                modified_geoms.append(MultiLineString(modified_multiline_coords))
+                modified_geoms.append(
+                    MultiLineString(modified_multiline_coords))
 
         # Update the geometry column in the filtered rows
         gdf.loc[lines.index, 'geometry'] = modified_geoms
@@ -298,30 +315,31 @@ else:
 
             # Convert the GeoJSON data to a GeoDataFrame
             gdf = gpd.GeoDataFrame.from_features(geojson_data["features"])
-            
+
             # Check if the geometry type is LineString or MultiLineString
             if any(gdf["geometry"].geom_type.isin(["LineString", "MultiLineString"])):
                 # Alter the geometry with the provided function
                 gdf = make_random_changes_from_file(gdf)
 
             # Extract the file name without the extension and keep the spaces
-            file_name_without_extension = os.path.splitext(uploaded_file.name)[0]
+            file_name_without_extension = os.path.splitext(uploaded_file.name)[
+                0]
 
             # Add the 'Name' column to the GeoDataFrame
             gdf['Name'] = file_name_without_extension
-            
+
             # Convert the modified GeoDataFrame back to GeoJSON
             geojson_data = json.loads(gdf.to_json())
 
             # Convert GeoJSON data to a string and then encode it
             geojson_str = json.dumps(geojson_data)
             geojson_bytes = geojson_str.encode('utf-8')
-            
+
             # Use BytesIO to hold the byte data
             buffer = BytesIO()
             buffer.write(geojson_bytes)
             buffer.seek(0)
-            
+
             # Create a download link for the GeoJSON data
             fname = file_name_without_extension + ".geojson"
             st.markdown(
@@ -331,9 +349,7 @@ else:
 
         if st.button('Back to Home'):
             st.session_state.operation = None
-            st.experimental_rerun()
-
-
+            st.rerun()
 
     def display_boundary_page():
         def get_geometry(address):
@@ -342,13 +358,16 @@ else:
             coordinates = []
 
             if multipolygon.geom_type == 'Polygon':
-                coordinates = [list(coord) for coord in multipolygon.exterior.coords]
+                coordinates = [list(coord)
+                               for coord in multipolygon.exterior.coords]
             elif multipolygon.geom_type == 'MultiPolygon':
                 for polygon in multipolygon:
-                    coordinates.extend([list(coord) for coord in polygon.exterior.coords])
+                    coordinates.extend([list(coord)
+                                       for coord in polygon.exterior.coords])
             else:
-                raise ValueError("Unsupported geometry type: {}".format(multipolygon.geom_type))
-            
+                raise ValueError("Unsupported geometry type: {}".format(
+                    multipolygon.geom_type))
+
             return coordinates, multipolygon
 
         def plot_polygon(coordinates, multipolygon):
@@ -365,8 +384,8 @@ else:
             plt.title('Polygon')
             st.pyplot(fig)
 
-
         # Function to get counts of street types
+
         def get_street_counts(G):
             edges = ox.graph_to_gdfs(G, nodes=False, edges=True)
             return edges['highway'].value_counts()
@@ -376,7 +395,8 @@ else:
             amenities_counts = {}
             for amenity in amenities:
                 try:
-                    amenities_gdf = ox.geometries_from_polygon(multipolygon, tags={'amenity': amenity})
+                    amenities_gdf = ox.geometries_from_polygon(
+                        multipolygon, tags={'amenity': amenity})
                     amenities_counts[amenity] = len(amenities_gdf)
                 except Exception as e:
                     amenities_counts[amenity] = str(e)
@@ -389,31 +409,38 @@ else:
             street_counts = get_street_counts(G)
 
             # Display street counts
-            st.sidebar.markdown("<h1 style='color: red;'>Street Counts</h1>", unsafe_allow_html=True)
+            st.sidebar.markdown(
+                "<h1 style='color: red;'>Street Counts</h1>", unsafe_allow_html=True)
             for index, value in street_counts.items():
-                st.sidebar.markdown(f"<p style='font-weight:bold;color:white;'>{index}</p><p style='font-weight:bold;color:lightblue;'>{value}</p>", unsafe_allow_html=True)
+                st.sidebar.markdown(
+                    f"<p style='font-weight:bold;color:white;'>{index}</p><p style='font-weight:bold;color:lightblue;'>{value}</p>", unsafe_allow_html=True)
 
             # Display amenities counts
-            amenities = ['camp_site', 'school', 'bus_stop', 'hospital', 'hotel', 'motel', 'bar', 'biergarten', 'cafe', 'fast_food', 'food_court', 'ice_cream', 
-                        #  'pub', 'community_centre', 'events_venue', 'social_centre', 'police', 'ranger_station', 'drinking_water', 'dog_toilet', 'shelter',
-                        #  'telephone', 'toilets', 'animal_boarding', 'childcare', 'hunting_stand'
-                        ]
-            
+            amenities = ['camp_site', 'school', 'bus_stop', 'hospital', 'hotel', 'motel', 'bar', 'biergarten', 'cafe', 'fast_food', 'food_court', 'ice_cream',
+                         #  'pub', 'community_centre', 'events_venue', 'social_centre', 'police', 'ranger_station', 'drinking_water', 'dog_toilet', 'shelter',
+                         #  'telephone', 'toilets', 'animal_boarding', 'childcare', 'hunting_stand'
+                         ]
+
             amenities_counts = get_amenities_counts(multipolygon, amenities)
-            st.sidebar.markdown("<h1 style='color: red;'>Amenities Counts</h1>", unsafe_allow_html=True)
+            st.sidebar.markdown(
+                "<h1 style='color: red;'>Amenities Counts</h1>", unsafe_allow_html=True)
             for index, value in amenities_counts.items():
-                st.sidebar.markdown(f"<p style='font-weight:bold;color:white;'>{index}</p><p style='font-weight:bold;color:lightblue;'>{value}</p>", unsafe_allow_html=True)
+                st.sidebar.markdown(
+                    f"<p style='font-weight:bold;color:white;'>{index}</p><p style='font-weight:bold;color:lightblue;'>{value}</p>", unsafe_allow_html=True)
 
             # Bar chart for street counts
-            fig, ax = plt.subplots(figsize=(8,6))
-            ax.bar(street_counts.index.map(str), street_counts.values)  # Convert index to string
+            fig, ax = plt.subplots(figsize=(8, 6))
+            # Convert index to string
+            ax.bar(street_counts.index.map(str), street_counts.values)
             plt.xticks(rotation=45)
             st.pyplot(fig)
 
             # Pie chart for street counts
-            fig1, ax1 = plt.subplots(figsize=(5,3))
-            wedges, _ = ax1.pie(street_counts.values, wedgeprops=dict(width=0.3), startangle=-40)
-            ax1.legend(wedges, street_counts.index.map(str), title="Street Types", loc="center left", bbox_to_anchor=(1, 0, 0.5, 1))
+            fig1, ax1 = plt.subplots(figsize=(5, 3))
+            wedges, _ = ax1.pie(street_counts.values,
+                                wedgeprops=dict(width=0.3), startangle=-40)
+            ax1.legend(wedges, street_counts.index.map(
+                str), title="Street Types", loc="center left", bbox_to_anchor=(1, 0, 0.5, 1))
             ax1.set_title('Distribution of Street Types')
             st.pyplot(fig1)
 
@@ -435,14 +462,12 @@ else:
                 st.text("An error occurred:")
                 st.text(e)
 
-
         if st.button("Get Additional Details"):
             get_additional_details()
 
-
         if st.button('Back to Home'):
             st.session_state.operation = None
-            st.experimental_rerun()
+            st.rerun()
 
     def is_lat_lon(value):
         try:
@@ -450,7 +475,7 @@ else:
             return True
         except:
             return False
-        
+
     ################
     ################
 
@@ -473,7 +498,6 @@ else:
 
         b64 = base64.b64encode(object_to_download.encode()).decode()
         return f'<a href="data:text/csv;base64,{b64}" download="{download_filename}"> {download_link_text} </a>'
-
 
     def fetch_google_places(api_url, params):
         all_places = []
@@ -515,7 +539,7 @@ else:
         place_response = requests.get(API_URL, params=params).json()
         if place_response.get("candidates"):
             location = place_response['candidates'][0]['geometry']['location']
-            
+
             # Parameters for nearby search, based on the found location
             nearby_params = {
                 'location': f"{location['lat']},{location['lng']}",
@@ -536,33 +560,30 @@ else:
         else:
             return []
 
-
-
-
     def search_pois():
         st.header("Search for Points of Interest")
         place_name = st.text_input("Enter a place name or address:")
         search_type = st.radio("Select Search Type", ["OSM", "Google POIs"])
 
         google_types = [
-        "accounting", "airport", "amusement_park", "aquarium", "art_gallery", "atm",
-        "bakery", "bank", "bar", "beauty_salon", "bicycle_store", "book_store",
-        "bowling_alley", "bus_station", "cafe", "campground", "car_dealer", "car_rental",
-        "car_repair", "car_wash", "casino", "cemetery", "church", "city_hall",
-        "clothing_store", "convenience_store", "courthouse", "dentist", "department_store",
-        "doctor", "drugstore", "electrician", "electronics_store", "embassy",
-        "fire_station", "florist", "funeral_home", "furniture_store", "gas_station", "gym",
-        "hair_care", "hardware_store", "hindu_temple", "home_goods_store", "hospital",
-        "insurance_agency", "jewelry_store", "laundry", "lawyer", "library",
-        "light_rail_station", "liquor_store", "local_government_office", "locksmith",
-        "lodging", "meal_delivery", "meal_takeaway", "mosque", "movie_rental",
-        "movie_theater", "moving_company", "museum", "night_club", "painter", "park",
-        "parking", "pet_store", "pharmacy", "physiotherapist", "plumber", "police",
-        "post_office", "primary_school", "real_estate_agency", "restaurant",
-        "roofing_contractor", "rv_park", "school", "secondary_school", "shoe_store",
-        "shopping_mall", "spa", "stadium", "storage", "store", "subway_station",
-        "supermarket", "synagogue", "taxi_stand", "tourist_attraction", "train_station",
-        "transit_station", "travel_agency", "university", "veterinary_care", "zoo"
+            "accounting", "airport", "amusement_park", "aquarium", "art_gallery", "atm",
+            "bakery", "bank", "bar", "beauty_salon", "bicycle_store", "book_store",
+            "bowling_alley", "bus_station", "cafe", "campground", "car_dealer", "car_rental",
+            "car_repair", "car_wash", "casino", "cemetery", "church", "city_hall",
+            "clothing_store", "convenience_store", "courthouse", "dentist", "department_store",
+            "doctor", "drugstore", "electrician", "electronics_store", "embassy",
+            "fire_station", "florist", "funeral_home", "furniture_store", "gas_station", "gym",
+            "hair_care", "hardware_store", "hindu_temple", "home_goods_store", "hospital",
+            "insurance_agency", "jewelry_store", "laundry", "lawyer", "library",
+            "light_rail_station", "liquor_store", "local_government_office", "locksmith",
+            "lodging", "meal_delivery", "meal_takeaway", "mosque", "movie_rental",
+            "movie_theater", "moving_company", "museum", "night_club", "painter", "park",
+            "parking", "pet_store", "pharmacy", "physiotherapist", "plumber", "police",
+            "post_office", "primary_school", "real_estate_agency", "restaurant",
+            "roofing_contractor", "rv_park", "school", "secondary_school", "shoe_store",
+            "shopping_mall", "spa", "stadium", "storage", "store", "subway_station",
+            "supermarket", "synagogue", "taxi_stand", "tourist_attraction", "train_station",
+            "transit_station", "travel_agency", "university", "veterinary_care", "zoo"
         ]
 
         if search_type == "OSM":
@@ -589,14 +610,16 @@ else:
                     tags.update(tag)
 
         elif search_type == "Google POIs":
-            selected_types = st.multiselect('Select Types to Search For:', google_types, ['restaurant'])
+            selected_types = st.multiselect(
+                'Select Types to Search For:', google_types, ['restaurant'])
 
         if st.button("Search"):
             if search_type == "OSM" and place_name:
                 # Using OSMnx to search for amenities based on selected tags
                 gdf = ox.geometries_from_place(place_name, tags=tags)
                 # Dissolve by 'name' to aggregate geometries and filter for Points
-                gdf_dissolved = gdf.dissolve(by='name')[['geometry']].reset_index()
+                gdf_dissolved = gdf.dissolve(
+                    by='name')[['geometry']].reset_index()
                 gdf_dissolved = gdf_dissolved[gdf_dissolved['geometry'].geom_type == 'Point']
 
                 # Convert to GeoJSON
@@ -613,9 +636,9 @@ else:
                 href = f'<a href="data:file/json;base64,{b64}" download="{place_name}_{selected_categories}_OSM_POIs.csv">Download CSV file</a>'
                 st.markdown(href, unsafe_allow_html=True)
 
-
             elif search_type == "Google POIs" and place_name:
-                places = search_google_pois(place_name, wander_key_, selected_types)
+                places = search_google_pois(
+                    place_name, wander_key_, selected_types)
                 if places:
                     # Process places to a GeoJSON format
                     features = [{
@@ -652,7 +675,8 @@ else:
                     df = pd.DataFrame(places_dicts)
 
                     # Generate download link for the CSV
-                    href = csv_download_link(df, f"{place_name.replace(' ', '_')}_{selected_types}_Google_POIs.csv", "Download CSV")
+                    href = csv_download_link(
+                        df, f"{place_name.replace(' ', '_')}_{selected_types}_Google_POIs.csv", "Download CSV")
                     st.markdown(href, unsafe_allow_html=True)
 
     ##############################
@@ -663,18 +687,17 @@ else:
 
         if st.button('Back to Home'):
             st.session_state.operation = None
-            st.experimental_rerun()
+            st.rerun()
     ##################
 # search POIs page
-
 
     def convert_arcgis_paths_to_geojson(arcgis_geom):
         """
         Converts an ArcGIS 'paths' geometry object to a GeoJSON structure.
-        
+
         Parameters:
         arcgis_geom (dict): A dictionary containing the ArcGIS geometry with 'paths'.
-        
+
         Returns:
         dict: A GeoJSON geometry dictionary.
         """
@@ -697,46 +720,14 @@ else:
             st.error(f"Error querying API: {e}")
             return None
 
-    def check_far_splitted(geometry, threshold=50):
-        """
-        Check if any segments in the LineString or MultiLineString geometry are far splitted.
-        
-        Parameters:
-        geometry: Shapely geometry (LineString or MultiLineString)
-        threshold: Distance in meters beyond which segments are considered far-splitted
-        
-        Returns:
-        str: 'yes' if the geometry is far splitted, 'no' otherwise.
-        """
-        if isinstance(geometry, LineString):
-            segments = [geometry]
-        elif isinstance(geometry, MultiLineString):
-            segments = list(geometry.geoms)
-        else:
-            return 'no'  # If not a LineString or MultiLineString
-
-        for i in range(len(segments) - 1):
-            # Get the end point of the current segment and the start point of the next segment
-            end_point = segments[i].coords[-1]
-            start_point = segments[i + 1].coords[0]
-            
-            # Calculate the Euclidean distance between these points
-            distance = np.sqrt((end_point[0] - start_point[0])**2 + (end_point[1] - start_point[1])**2)
-            
-            if distance > threshold:
-                return 'yes'
-
-        return 'no'
-
-
     def query_parks_facilities_api(endpoint, params):
         """
         Queries the Parks and Facilities API and returns a GeoDataFrame.
-        
+
         Parameters:
         - endpoint: The API endpoint URL.
         - params: The parameters for the API request.
-        
+
         Returns:
         - gpd.GeoDataFrame: A GeoDataFrame with the queried data.
         """
@@ -748,8 +739,9 @@ else:
             spatial_ref = data['spatialReference']['latestWkid']
         else:
             if 'features' in data and data['features']:
-                spatial_ref = data['features'][0]['geometry'].get('spatialReference', {}).get('latestWkid', None)
-        
+                spatial_ref = data['features'][0]['geometry'].get(
+                    'spatialReference', {}).get('latestWkid', None)
+
         # Extract features and create a list for geometries
         features = data['features']
         geometries = []
@@ -757,7 +749,7 @@ else:
 
         for feature in features:
             geom = feature['geometry']
-            
+
             # Handle None geometry
             if geom is None:
                 continue  # Skip this feature if geometry is None
@@ -770,7 +762,7 @@ else:
 
             # Append the converted Shapely geometry
             geometries.append(geom_geojson)
-            
+
             # Extract the attributes
             attributes.append(feature['attributes'])
 
@@ -783,9 +775,8 @@ else:
         # Set the CRS based on the spatial reference from the API response
         if spatial_ref:
             gdf.set_crs(epsg=spatial_ref, inplace=True)
-        
-        return gdf
 
+        return gdf
 
     def query_apis_page():
         st.title("Query APIs")
@@ -793,20 +784,21 @@ else:
         # Dropdown menu for API selection
         api_choice = st.selectbox(
             "Select API to Query:",
-            ("Greenways API", "Multi Use Paths API", "Parks and Facilities API")
+            ("Wake Forest - Greenways API", "Wake Forest - Multi Use Paths API",
+             "Wake Forest - Parks and Facilities API")
         )
 
         # Input for Layer ID
         layer_id = st.text_input("Enter Layer ID:", value="0")
 
         # Determine the endpoint based on user selection
-        if api_choice == "Greenways API":
+        if api_choice == "Wake Forest - Greenways API":
             endpoint = f"https://twfgis.wakeforestnc.gov/server/rest/services/Greenways_Wake_Forest/MapServer/{layer_id}/query"
             dissolve_column = "Name"
-        elif api_choice == "Multi Use Paths API":
+        elif api_choice == "Wake Forest - Multi Use Paths API":
             endpoint = f"https://twfgis.wakeforestnc.gov/server/rest/services/MultiUsePath/MapServer/{layer_id}/query"
             dissolve_column = "Street"
-        elif api_choice == "Parks and Facilities API":
+        elif api_choice == "Wake Forest - Parks and Facilities API":
             endpoint = f"https://twfgis.wakeforestnc.gov/server/rest/services/ParksAndFacilities/MapServer/{layer_id}/query"
             dissolve_column = None  # No need to dissolve for points
 
@@ -833,34 +825,38 @@ else:
                     spatial_ref = data['spatialReference']['latestWkid']
                 else:
                     if 'features' in data and data['features']:
-                        spatial_ref = data['features'][0]['geometry'].get('spatialReference', {}).get('latestWkid', None)
-                
+                        spatial_ref = data['features'][0]['geometry'].get(
+                            'spatialReference', {}).get('latestWkid', None)
+
                 for feature in features:
                     geom = feature['geometry']
-                    
+
                     # Check if the geometry is valid
                     if geom is None:
                         continue
-                    
+
                     try:
                         # Convert geometry based on the API
-                        if api_choice == "Greenways API" or api_choice == "Multi Use Paths API":
+                        if api_choice == "Wake Forest - Greenways API" or api_choice == "Wake Forest - Multi Use Paths API":
                             if 'paths' in geom:
-                                geom_geojson = convert_arcgis_paths_to_geojson(geom)
+                                geom_geojson = convert_arcgis_paths_to_geojson(
+                                    geom)
                             else:
                                 geom_geojson = shape(geom)
                             shapely_geom = shape(geom_geojson)
-                        elif api_choice == "Parks and Facilities API":
+                        elif api_choice == "Wake Forest - Parks and Facilities API":
                             if 'x' in geom and 'y' in geom:
                                 shapely_geom = Point(geom['x'], geom['y'])
                             else:
-                                st.warning("Skipping a feature with unknown geometry format.")
+                                st.warning(
+                                    "Skipping a feature with unknown geometry format.")
                                 continue
-                        
+
                         geometries.append(shapely_geom)
                         attributes.append(feature['attributes'])
                     except Exception as e:
-                        st.warning(f"Skipping a feature due to geometry processing error: {e}")
+                        st.warning(
+                            f"Skipping a feature due to geometry processing error: {e}")
                         continue
 
                 # Log the number of geometries and attributes
@@ -870,15 +866,20 @@ else:
                 # Create a DataFrame for attributes
                 df = pd.DataFrame(attributes)
 
-                if dissolve_column:
-                    # Drop rows where the dissolve column is blank or NaN
+                if dissolve_column and dissolve_column in df.columns:
+                    # Ensure column exists before using it
                     mask = df[dissolve_column].notna()
                     df = df[mask]
-                    geometries = [geometry for i, geometry in enumerate(geometries) if mask.iloc[i]]
+                    geometries = [geometry for i, geometry in enumerate(
+                        geometries) if mask.iloc[i]]
+                else:
+                    st.warning(
+                        f"Column '{dissolve_column}' not found in the dataset. Skipping dissolve operation.")
 
                     # Ensure the number of geometries and attributes still match
                     if len(df) != len(geometries):
-                        st.error("Mismatch between number of geometries and attributes after processing. Please check the data.")
+                        st.error(
+                            "Mismatch between number of geometries and attributes after processing. Please check the data.")
                         return
 
                 # Create a GeoDataFrame by combining the attributes with the geometries
@@ -891,36 +892,42 @@ else:
                 if dissolve_column:
                     # Perform the dissolve operation by the appropriate column
                     if dissolve_column in df.columns:
-                        dissolved_gdf = gdf.dissolve(by=dissolve_column, aggfunc='first')
+                        dissolved_gdf = gdf.dissolve(
+                            by=dissolve_column, aggfunc='first')
                         dissolved_gdf.reset_index(inplace=True)
                     else:
-                        st.warning(f"'{dissolve_column}' column not found. Skipping dissolve operation.")
+                        st.warning(
+                            f"'{dissolve_column}' column not found. Skipping dissolve operation.")
                         dissolved_gdf = gdf
                 else:
                     dissolved_gdf = gdf  # For points, no dissolve needed
 
                 # Rename 'Name' or 'Street' to 'name'
                 if dissolve_column:
-                    dissolved_gdf.rename(columns={dissolve_column: 'name'}, inplace=True)
+                    dissolved_gdf.rename(
+                        columns={dissolve_column: 'name'}, inplace=True)
                 elif api_choice == "Parks and Facilities API":
-                    dissolved_gdf.rename(columns={'LABEL': 'name'}, inplace=True)
-                    
+                    dissolved_gdf.rename(
+                        columns={'LABEL': 'name'}, inplace=True)
+
                 # Convert 'name' column to lowercase and filter out non-logical names
                 if 'name' in dissolved_gdf.columns:
                     dissolved_gdf['name'] = dissolved_gdf['name'].str.lower()
                     non_logical_names = [
-                        "no name trail", "unknown", "no name", "null", "undefined", 
+                        "no name trail", "unknown", "no name", "null", "undefined",
                         "trail", "n/a", "na", "-", "", None
                     ]
 
-                    dissolved_gdf = dissolved_gdf[~dissolved_gdf['name'].isin(non_logical_names)]
-                    
+                    dissolved_gdf = dissolved_gdf[~dissolved_gdf['name'].isin(
+                        non_logical_names)]
+
                     # making name titles --> capitalizing each word
                     dissolved_gdf['name'] = dissolved_gdf['name'].str.title()
 
                 if api_choice != "Parks and Facilities API":
                     # Check geometries for being far splitted
-                    dissolved_gdf['far_splitted'] = dissolved_gdf['geometry'].apply(check_far_splitted)
+                    dissolved_gdf['far_splitted'] = dissolved_gdf['geometry'].apply(
+                        check_far_splitted)
 
                 # Transform the CRS to EPSG:4326 (WGS 84)
                 dissolved_gdf = dissolved_gdf.to_crs(epsg=4326)
@@ -935,7 +942,8 @@ else:
                 # Provide options to download the result as an Excel or GeoJSON file
                 output = BytesIO()
                 with pd.ExcelWriter(output, engine='xlsxwriter') as writer:
-                    dissolved_gdf.to_excel(writer, index=False, sheet_name='Sheet1')
+                    dissolved_gdf.to_excel(
+                        writer, index=False, sheet_name='Sheet1')
 
                 output.seek(0)
 
@@ -955,17 +963,11 @@ else:
                     mime="application/json"
                 )
 
-
-
-
-
         if st.button('Back to Home'):
             st.session_state.operation = None
-            st.experimental_rerun()
-
+            st.rerun()
 
     ##################
-
 
     def main():
         st.title("Wander Builders")
@@ -975,19 +977,19 @@ else:
             with st.sidebar:
                 if st.button("Get Boundary", key='get_boundary'):
                     st.session_state.operation = "boundary"
-                    st.experimental_rerun()
+                    st.rerun()
                 elif st.button("Convert KML to GeoJSON", key='convert_kml'):
                     st.session_state.operation = "convert_kml"
-                    st.experimental_rerun()
+                    st.rerun()
                 elif st.button("Search POIs", key='search_pois'):
                     st.session_state.operation = "search_pois"
-                    st.experimental_rerun()
+                    st.rerun()
                 elif st.button("Geocoding & Reverse Geocoding", key='geocoding'):
                     st.session_state.operation = "geocoding"
-                    st.experimental_rerun()
+                    st.rerun()
                 elif st.button("Query APIs", key='query_apis'):  # New page
                     st.session_state.operation = "query_apis"
-                    st.experimental_rerun()
+                    st.rerun()
 
         if "operation" not in st.session_state:
             st.session_state.operation = None

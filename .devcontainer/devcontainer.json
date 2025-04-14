@@ -1,25 +1,22 @@
 {
   "name": "Python 3",
-  // Or use a Dockerfile or Docker Compose file. More info: https://containers.dev/guide/dockerfile
   "image": "mcr.microsoft.com/devcontainers/python:1-3.11-bullseye",
   "customizations": {
     "codespaces": {
-      "openFiles": [
-        "README.md",
-        "COPY_Boundary_streamlit.py"
-      ]
+      "openFiles": ["README.md", "app.py"]
     },
     "vscode": {
       "settings": {},
-      "extensions": [
-        "ms-python.python",
-        "ms-python.vscode-pylance"
-      ]
+      "extensions": ["ms-python.python", "ms-python.vscode-pylance"]
     }
   },
-  "updateContentCommand": "[ -f packages.txt ] && sudo apt update && sudo apt upgrade -y && sudo xargs apt install -y <packages.txt; [ -f requirements.txt ] && pip3 install --user -r requirements.txt; pip3 install --user streamlit; echo '✅ Packages installed and Requirements met'",
+  "containerEnv": {
+    "GDAL_VERSION": "3.3.2"
+  },
+  "updateContentCommand": "sudo apt-get update && sudo apt-get install -y gdal-bin libgdal-dev libgeos-dev && pip3 install --user --no-cache-dir -r requirements.txt || echo '⚠️ Failed to install requirements!'",
+  "postCreateCommand": "pip3 install --user --no-cache-dir -r requirements.txt",
   "postAttachCommand": {
-    "server": "streamlit run COPY_Boundary_streamlit.py --server.enableCORS false --server.enableXsrfProtection false"
+     "server": "/bin/sh -c 'mkdir -p ~/.streamlit && cp /workspaces/Wander_Builders-1/.streamlit/config.toml ~/.streamlit/config.toml && streamlit run app.py'"
   },
   "portsAttributes": {
     "8501": {
@@ -27,7 +24,5 @@
       "onAutoForward": "openPreview"
     }
   },
-  "forwardPorts": [
-    8501
-  ]
+  "forwardPorts": [8501]
 }

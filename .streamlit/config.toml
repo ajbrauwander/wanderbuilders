@@ -1,0 +1,20 @@
+[server]
+runOnSave = true  # Enables auto-reload on file changes
+headless = true  # Enables running on remote servers
+port = 8501  # Default Streamlit port
+enableCORS = false  # Disables CORS for local development
+enableXsrfProtection = false  # Disables XSRF protection (useful for local dev)
+
+[client]
+showErrorDetails = true  # Show full error messages in UI
+
+[logger]
+level = "info"  # Options: debug, info, warning, error
+
+[theme]
+base = "light"  # Options: light or dark
+primaryColor = "#ff4b4b"
+backgroundColor = "#ffffff"
+secondaryBackgroundColor = "#f0f2f6"
+textColor = "#262730"
+font = "sans serif"
