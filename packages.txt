@@ -1,3 +1,4 @@
 gdal-bin
 libgdal-dev
 libgeos-dev
+python3-distutils
