@@ -13,10 +13,10 @@
   "containerEnv": {
     "GDAL_VERSION": "3.3.2"
   },
-  "updateContentCommand": "/bin/sh -c 'wget https://repo.anaconda.com/miniconda/Miniconda3-latest-Linux-x86_64.sh -O /tmp/miniconda.sh && bash /tmp/miniconda.sh -b -p $HOME/miniconda && $HOME/miniconda/bin/conda init bash && source $HOME/.bashrc && $HOME/miniconda/bin/conda env create -f environment.yml || echo \"⚠️ Failed to create Conda environment!\"'",
-  "postCreateCommand": "/bin/sh -c 'source $HOME/.bashrc && $HOME/miniconda/bin/conda env update -f environment.yml || echo \"⚠️ Failed to update Conda environment!\"'",
+  "updateContentCommand": "/bin/bash -c 'wget https://repo.anaconda.com/miniconda/Miniconda3-latest-Linux-aarch64.sh -O /tmp/miniconda.sh && bash /tmp/miniconda.sh -b -p $HOME/miniconda && $HOME/miniconda/bin/conda init bash && . $HOME/.bashrc && $HOME/miniconda/bin/conda env create -f environment.yml || echo \"⚠️ Failed to create Conda environment!\"'",
+  "postCreateCommand": "/bin/bash -c '. $HOME/.bashrc && $HOME/miniconda/bin/conda env update -f environment.yml || echo \"⚠️ Failed to update Conda environment!\"'",
   "postAttachCommand": {
-    "server": "/bin/sh -c 'mkdir -p ~/.streamlit && cp /workspaces/Wander_Builders-1/.streamlit/config.toml ~/.streamlit/config.toml && source $HOME/.bashrc && $HOME/miniconda/bin/conda run -n wander_env streamlit run app.py'"
+    "server": "/bin/bash -c 'mkdir -p ~/.streamlit && cp /workspaces/Wander_Builders-1/.streamlit/config.toml ~/.streamlit/config.toml && . $HOME/.bashrc && $HOME/miniconda/bin/conda run -n wander_env streamlit run app.py'"
   },
   "portsAttributes": {
     "8501": {

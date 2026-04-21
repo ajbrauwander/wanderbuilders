@@ -1,1 +1,17 @@
-.streamlit/secrets.toml
+# System files
+.DS_Store
+Thumbs.db
+
+# Python
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+env/
+venv/
+.env/
+.ipynb_checkpoints/
+
+# Secrets / service account keys
+.env
+*.key
