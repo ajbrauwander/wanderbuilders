@@ -31,7 +31,7 @@ from datetime import datetime
 
 CONFIG = {
     "wildapricot_api_key": os.getenv("WILDAPRICOT_API_KEY", ""),
-    "wander_api_url":      os.getenv("WANDER_API_URL", "https://api.wandermaps.com"),
+    "wander_api_url":      os.getenv("WANDER_API_URL", "https://api.wander-app.com"),
     "wander_jwt":          os.getenv("WANDER_JWT", ""),
     "wander_map_id":       os.getenv("WANDER_MAP_ID", ""),
 }
